@@ -1,0 +1,22 @@
+from http import HTTPStatus
+
+import pytest
+from django.urls import reverse
+
+
+@pytest.mark.django_db
+def test_django_admin_login_page(client):
+    response = client.get(reverse("admin:login"))
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.request["PATH_INFO"].startswith("/api/")
+{% if use_wagtail %}
+
+
+@pytest.mark.django_db
+def test_wagtail_admin_login_page(client):
+    response = client.get(reverse("wagtailadmin_login"))
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.request["PATH_INFO"] == "/api/cms/admin/login/"
+{% endif %}

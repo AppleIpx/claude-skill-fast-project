@@ -1,0 +1,15 @@
+lint.ignore = [
+  "G004",   # f-strings in logging calls are fine
+  "RUF001", # Cyrillic in strings
+  "RUF002", # Cyrillic in docstrings
+  "RUF003", # Cyrillic in comments
+  "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar`
+  "S101",   # Use of assert detected https://docs.astral.sh/ruff/rules/assert/
+  "SIM102", # sometimes it's better to nest
+  "TC001",  # runtime imports used only for typing are fine
+  "TC002",
+  "TC003",
+  "UP034",  # extraneous parentheses
+]
+# Several names from one module may share a single import line
+lint.isort.force-single-line = false

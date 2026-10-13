@@ -1,0 +1,22 @@
+{
+  "project_name": "Demo Full",
+  "project_slug": "demo_full",
+  "description": "Demo Full backend",
+  "author_name": "Demo Author",
+  "email": "admin@example.com",
+  "domain_name": "example.com",
+  "python_version": "3.14",
+  "django_version": "6.0",
+  "use_wagtail": "y",
+  "use_s3": "y",
+  "rest_api": "DRF",
+  "use_celery": "y",
+  "use_async": "n",
+  "ci_tool": "Gitlab",
+  "remove_users_tests": "y",
+  "username_type": "email",
+  "mail_service": "Other SMTP",
+  "use_sentry": "n",
+  "postgresql_version": "18",
+  "open_source_license": "Not open source"
+}

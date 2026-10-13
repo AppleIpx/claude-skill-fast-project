@@ -1,0 +1,3 @@
+def exclude_cms_endpoints(endpoints):
+    """drf-spectacular preprocessing hook: hide Wagtail admin's internal API from Swagger."""
+    return [endpoint for endpoint in endpoints if not endpoint[0].startswith("/api/cms/")]

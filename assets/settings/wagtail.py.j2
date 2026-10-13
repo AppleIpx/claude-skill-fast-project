@@ -1,0 +1,41 @@
+# WAGTAIL
+# ------------------------------------------------------------------------------
+# https://docs.wagtail.org/en/stable/reference/settings.html
+# Values marked "default" are Wagtail 8.0 defaults, duplicated so nobody has to look them up.
+WAGTAIL_SITE_NAME = "{{ project_name }}"
+WAGTAILADMIN_BASE_URL = env.str("FRONTEND_URL", default="http://localhost:8000")
+# Served at /api/cms/admin/ (see config/urls.py)
+WAGTAIL_ADMIN_URL = "cms/admin/"
+
+# Custom models are created up front: swapping them after the first migration is painful.
+WAGTAILIMAGES_IMAGE_MODEL = "core.CustomImage"
+WAGTAILDOCS_DOCUMENT_MODEL = "core.CustomDocument"
+
+# Images
+# https://docs.wagtail.org/en/stable/reference/settings.html#images
+WAGTAILIMAGES_EXTENSIONS = ["avif", "gif", "jpg", "jpeg", "png", "webp"]  # default
+WAGTAILIMAGES_MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB, default
+WAGTAILIMAGES_MAX_IMAGE_PIXELS = 128 * 1000000  # 128 megapixels, default
+# Extra conversions on top of the built-in bmp -> png, heic -> jpeg
+WAGTAILIMAGES_FORMAT_CONVERSIONS = {}  # default
+WAGTAILIMAGES_JPEG_QUALITY = 76  # default
+WAGTAILIMAGES_WEBP_QUALITY = 80  # default
+WAGTAILIMAGES_AVIF_QUALITY = 61  # default
+WAGTAILIMAGES_HEIC_QUALITY = 80  # default
+WAGTAILIMAGES_FEATURE_DETECTION_ENABLED = False  # default
+WAGTAILIMAGES_INDEX_PAGE_SIZE = 30  # default
+WAGTAILIMAGES_CHOOSER_PAGE_SIZE = 20  # default
+
+# Documents
+# https://docs.wagtail.org/en/stable/reference/settings.html#documents
+WAGTAILDOCS_EXTENSIONS = None  # default: any extension is allowed
+WAGTAILDOCS_MAX_UPLOAD_SIZE = None  # default: no Wagtail limit, only DATA_UPLOAD_MAX_MEMORY_SIZE
+WAGTAILDOCS_SERVE_METHOD = None  # default: "serve_view" for local storage, "redirect" for remote
+WAGTAILDOCS_INLINE_CONTENT_TYPES = ["application/pdf"]  # default
+WAGTAILDOCS_BLOCK_EMBEDDED_CONTENT = True  # default
+
+{% if rest_api == "DRF" %}
+# Wagtail admin has its own internal DRF API under /api/cms/admin/api/, keep it out of Swagger.
+SPECTACULAR_SETTINGS["PREPROCESSING_HOOKS"] = ["{{ slug }}.core.openapi.exclude_cms_endpoints"]
+
+{% endif %}

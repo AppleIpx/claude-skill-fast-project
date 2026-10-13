@@ -1,0 +1,47 @@
+# Run with prek: `uvx prek run --all-files`, install the git hook with `uvx prek install`.
+exclude: '^docs/|/migrations/'
+default_stages: [pre-commit]
+
+default_language_version:
+  python: python{{ python_version }}
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-json
+      - id: check-toml
+      - id: check-xml
+      - id: check-yaml
+      - id: debug-statements
+      - id: check-builtin-literals
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-docstring-first
+      - id: detect-private-key
+
+  - repo: https://github.com/adamchainz/django-upgrade
+    rev: '1.33.0'
+    hooks:
+      - id: django-upgrade
+        args: ['--target-version', '{{ django_version }}']
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.10
+    hooks:
+      - id: ruff-check
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  - repo: https://github.com/djlint/djLint
+    rev: v1.46.4
+    hooks:
+      - id: djlint-reformat-django
+      - id: djlint-django
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.12.1
+    hooks:
+      - id: uv-lock

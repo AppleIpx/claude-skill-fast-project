@@ -1,0 +1,33 @@
+# Base stack for tests, no volumes: every run starts from a clean database.
+#   docker compose -f docker-compose.test.yml run --rm django pytest
+services:
+  django:
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: {{ slug }}_test_django
+    container_name: {{ slug }}_test_django
+    depends_on:
+      - postgres
+{% if use_celery %}
+      - redis
+{% endif %}
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    command: /start
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/production/postgres/Dockerfile
+    image: {{ slug }}_test_postgres
+    container_name: {{ slug }}_test_postgres
+    env_file:
+      - ./.envs/.local/.postgres
+{% if use_celery %}
+
+  redis:
+    image: docker.io/redis:7.2
+    container_name: {{ slug }}_test_redis
+{% endif %}

@@ -1,0 +1,46 @@
+image: docker:29
+
+stages:
+  - lint
+  - test
+
+variables:
+  POSTGRES_USER: '{{ slug }}'
+  POSTGRES_PASSWORD: ''
+  POSTGRES_DB: 'test_{{ slug }}'
+  POSTGRES_HOST_AUTH_METHOD: trust
+{% if use_celery %}
+  REDIS_URL: 'redis://redis:6379/0'
+{% endif %}
+
+prek:
+  stage: lint
+  image: ghcr.io/astral-sh/uv:python{{ python_version }}-bookworm
+  variables:
+    PREK_HOME: ${CI_PROJECT_DIR}/.cache/prek
+  cache:
+    paths:
+      - ${PREK_HOME}
+  script:
+    - uvx prek run --all-files --show-diff-on-failure --color=always
+  allow_failure: true
+
+pytest:
+  stage: test
+  image: docker:28.3.1
+  resource_group: pytest
+  services:
+    - docker:dind
+  before_script:
+    - docker compose -f docker-compose.test.yml down -v --remove-orphans
+    - docker compose -f docker-compose.test.yml build
+    - docker compose -f docker-compose.test.yml up -d
+    - sleep 10
+    - docker compose -f docker-compose.test.yml ps
+  script:
+    - docker compose -f docker-compose.test.yml run --rm django pytest
+  after_script:
+    - docker compose -f docker-compose.test.yml stop
+    - docker compose -f docker-compose.test.yml rm -f
+    - docker network prune -f
+  allow_failure: true

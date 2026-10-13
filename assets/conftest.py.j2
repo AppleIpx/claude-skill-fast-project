@@ -1,0 +1,9 @@
+# Fixtures live in {{ slug }}/conftest_plugins/, one module per domain.
+# Add a new module there and register it here.
+pytest_plugins = [
+{% if rest_api == "DRF" %}
+    "{{ slug }}.conftest_plugins.api_client_fixtures",
+{% endif %}
+    "{{ slug }}.conftest_plugins.base_fixtures",
+    "{{ slug }}.conftest_plugins.user_fixtures",
+]

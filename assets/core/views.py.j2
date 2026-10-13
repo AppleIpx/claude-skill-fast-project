@@ -1,0 +1,10 @@
+from django.db import transaction
+from django.http import HttpRequest, JsonResponse
+from django.views.decorators.http import require_GET
+
+
+@transaction.non_atomic_requests  # ATOMIC_REQUESTS is on; a health check must not touch the DB
+@require_GET
+def ping(request: HttpRequest) -> JsonResponse:
+    """Health check for load balancers and deploy probes."""
+    return JsonResponse({"status": "ok"})

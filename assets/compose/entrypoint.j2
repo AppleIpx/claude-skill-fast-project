@@ -1,0 +1,59 @@
+#!/bin/bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+log() {
+    >&2 echo "[entrypoint] $(date -u '+%Y-%m-%dT%H:%M:%SZ') $*"
+}
+
+log "container start: settings=${DJANGO_SETTINGS_MODULE:-not set} python=$(python --version 2>&1 | cut -d' ' -f2)"
+log "image revision: ${GIT_COMMIT_SHA:-unknown}"
+
+if [ -z "${POSTGRES_USER}" ]; then
+    base_postgres_image_default_user='postgres'
+    export POSTGRES_USER="${base_postgres_image_default_user}"
+fi
+
+log "waiting for PostgreSQL at ${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB} as ${POSTGRES_USER}"
+
+python << END
+import sys
+import time
+
+import psycopg
+
+suggest_unrecoverable_after = 30
+start = time.time()
+attempt = 0
+
+while True:
+    attempt += 1
+    try:
+        psycopg.connect(
+            dbname="${POSTGRES_DB}",
+            user="${POSTGRES_USER}",
+            password="${POSTGRES_PASSWORD}",
+            host="${POSTGRES_HOST}",
+            port="${POSTGRES_PORT}",
+        ).close()
+        break
+    except psycopg.OperationalError as error:
+        sys.stderr.write(f"[entrypoint] waiting for PostgreSQL... attempt {attempt}\n")
+
+        if time.time() - start > suggest_unrecoverable_after:
+            sys.stderr.write(
+                "[entrypoint]   This is taking longer than expected. "
+                f"The following exception may be indicative of an unrecoverable error: '{error}'\n"
+            )
+
+    time.sleep(1)
+
+sys.stderr.write(f"[entrypoint] connected after {attempt} attempt(s), {time.time() - start:.1f}s\n")
+END
+
+log "PostgreSQL is available"
+log "exec: $*"
+
+exec "$@"

@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+log() {
+    >&2 echo "[start] $(date -u '+%Y-%m-%dT%H:%M:%SZ') $*"
+}
+
+log "pending migrations:"
+python /app/manage.py showmigrations --plan | grep '\[ \]' >&2 || log "  none"
+
+log "applying migrations"
+python /app/manage.py migrate --noinput
+log "migrations applied"
+
+log "collecting static files"
+python /app/manage.py collectstatic --noinput
+log "static files collected"
+
+{% if use_async %}
+log "starting gunicorn (asgi, uvicorn worker) on 0.0.0.0:5000"
+exec gunicorn config.asgi --bind 0.0.0.0:5000 --chdir=/app -k uvicorn_worker.UvicornWorker
+{% else %}
+log "starting gunicorn (wsgi) on 0.0.0.0:5000"
+exec gunicorn config.wsgi --bind 0.0.0.0:5000 --chdir=/app
+{% endif %}

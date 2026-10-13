@@ -1,0 +1,44 @@
+name: CI
+
+env:
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
+on:
+  pull_request:
+    branches: ['main']
+  push:
+    branches: ['main']
+
+concurrency:
+  group: {% raw %}${{ github.head_ref || github.run_id }}{% endraw %}
+
+  cancel-in-progress: true
+
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - name: Run prek
+        run: uvx prek run --all-files --show-diff-on-failure
+
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v6
+      - name: Build test containers
+        run: docker compose -f docker-compose.test.yml build
+      - name: Start test containers
+        run: docker compose -f docker-compose.test.yml up -d
+      - name: Run pytest
+        run: docker compose -f docker-compose.test.yml run --rm django pytest
+      - name: Tear down test containers
+        if: always()
+        run: docker compose -f docker-compose.test.yml down -v --remove-orphans

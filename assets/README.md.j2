@@ -1,0 +1,59 @@
+# {{ project_name }}
+
+Django {{ django_version }} · Python {{ python_version }} · uv · Docker{% if use_wagtail %} · Wagtail{% endif %}{% if use_celery %} · Celery{% endif %}
+
+
+## Quick start
+
+```bash
+docker compose -f docker-compose.local.yml up --build
+```
+
+| What | URL |
+|---|---|
+| Health check | http://localhost:8000/api/ping/ |
+| Django admin | http://localhost:8000/api/admin/ |
+{% if use_wagtail %}
+| Wagtail admin | http://localhost:8000/api/cms/admin/ |
+{% endif %}
+{% if rest_api == "DRF" %}
+| Swagger (staff only) | http://localhost:8000/api/docs/ |
+{% endif %}
+
+Create a superuser:
+
+```bash
+docker compose -f docker-compose.local.yml run --rm django python manage.py createsuperuser
+```
+
+## Tests
+
+```bash
+docker compose -f docker-compose.test.yml run --rm django pytest
+```
+
+Fixtures live in `{{ slug }}/conftest_plugins/` and are registered in the root `conftest.py`.
+
+## Linters
+
+```bash
+uvx prek install          # git hook
+uvx prek run --all-files  # manual run
+```
+
+## Dependencies
+
+Managed by uv, `uv.lock` is the source of truth (Docker images use `uv sync --locked`).
+
+```bash
+uv add <package>   # then rebuild the images
+```
+
+## Environment
+{% if use_s3 %}
+
+- `USE_S3=True` stores media in S3-compatible storage (`AWS_*` variables in `.envs/.production/.django`),
+  `USE_S3=False` keeps media on the local filesystem.
+{% endif %}
+- Database settings come from `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`.
+- `.envs/.local/` is committed, `.envs/.production/` is never committed.

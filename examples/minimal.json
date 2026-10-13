@@ -1,0 +1,22 @@
+{
+  "project_name": "Demo Minimal",
+  "project_slug": "demo_minimal",
+  "description": "Demo Minimal backend",
+  "author_name": "Demo Author",
+  "email": "admin@example.com",
+  "domain_name": "example.com",
+  "python_version": "3.12",
+  "django_version": "5.2",
+  "use_wagtail": "n",
+  "use_s3": "n",
+  "rest_api": "Django Ninja",
+  "use_celery": "n",
+  "use_async": "n",
+  "ci_tool": "Github",
+  "remove_users_tests": "n",
+  "username_type": "username",
+  "mail_service": "Mailgun",
+  "use_sentry": "n",
+  "postgresql_version": "17",
+  "open_source_license": "MIT"
+}
